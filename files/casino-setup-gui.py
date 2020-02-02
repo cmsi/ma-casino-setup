@@ -24,14 +24,14 @@ class Frame(wx.Frame):
 
         layout = wx.BoxSizer(wx.VERTICAL)
 
-        self.radio_download = wx.RadioButton(self.panel, -1, "Download source tarball from official website")
-        self.radio_download.Bind(wx.EVT_RADIOBUTTON, self.OnChooseRadioDownload)
-        self.radio_download.SetValue(True)
-        layout.Add(self.radio_download, 0, wx.LEFT | wx.RIGHT | wx.TOP, 10)
+        self.radio_download_pw = wx.RadioButton(self.panel, -1, "Download source with username and password")
+        self.radio_download_pw.Bind(wx.EVT_RADIOBUTTON, self.OnChooseRadioDownloadPw)
+        self.radio_download_pw.SetValue(True)
+        layout.Add(self.radio_download_pw, 0, wx.LEFT | wx.RIGHT | wx.TOP, 10)
         grid_1 = wx.FlexGridSizer(2, 3)
-        self.text_username = wx.TextCtrl(self.panel, -1, value = 'source', size = (285, -1))
-        self.text_username.Disable()
-        self.text_password = wx.TextCtrl(self.panel, -1) # style = wx.TE_PASSWORD
+        self.text_username = wx.TextCtrl(self.panel, -1, size = (285, -1))
+        self.text_username.Bind(wx.EVT_TEXT, self.OnTextUsername)
+        self.text_password = wx.TextCtrl(self.panel, -1, style = wx.TE_PASSWORD)
         self.text_password.SetMaxLength(8)
         self.text_password.Bind(wx.EVT_TEXT, self.OnTextPassword)
         grid_1.Add(wx.StaticText(self.panel, -1, '     '), 0)
@@ -42,21 +42,31 @@ class Frame(wx.Frame):
         grid_1.Add(self.text_password, 1, wx.EXPAND | wx.TOP, 4)
         layout.Add(grid_1, 0, wx.LEFT | wx.RIGHT | wx.TOP, 10)
 
+        self.radio_download_url = wx.RadioButton(self.panel, -1, "Download source from temporary URL")
+        self.radio_download_url.Bind(wx.EVT_RADIOBUTTON, self.OnChooseRadioDownloadUrl)
+        layout.Add(self.radio_download_url, 0, wx.LEFT | wx.RIGHT | wx.TOP, 10)
+        grid_2 = wx.FlexGridSizer(2, 3)
+        self.text_url = wx.TextCtrl(self.panel, -1, size = (285, -1))
+        self.text_url.Bind(wx.EVT_TEXT, self.OnTextUrl)
+        grid_2.Add(wx.StaticText(self.panel, -1, '     '), 0)
+        grid_2.Add(wx.StaticText(self.panel, -1, "URL:"), 0, wx.RIGHT, 4)
+        grid_2.Add(self.text_url, 1, wx.EXPAND, 4)
+        layout.Add(grid_2, 0, wx.LEFT | wx.RIGHT | wx.TOP, 10)
+
         self.radio_local = wx.RadioButton(self.panel, -1, "Use a source tarball on local storage")
         self.radio_local.Bind(wx.EVT_RADIOBUTTON, self.OnChooseRadioLocal)
         layout.Add(self.radio_local, 0, wx.LEFT | wx.RIGHT | wx.TOP, 10)
-
-        grid_2 = wx.FlexGridSizer(2, 3)
+        grid_3 = wx.FlexGridSizer(2, 3)
         self.text_file = wx.TextCtrl(self.panel, -1, size = (325, -1), style = wx.TE_READONLY)
         self.button_choose = wx.Button(self.panel, -1, "Choose")
         self.button_choose.Bind(wx.EVT_BUTTON, self.OnChoose)
-        grid_2.Add(wx.StaticText(self.panel, -1, '     '), 0)
-        grid_2.Add(wx.StaticText(self.panel, -1, "File:"), 0, wx.RIGHT | wx.TOP, 4)
-        grid_2.Add(self.text_file, 1, wx.EXPAND | wx.TOP, 4)
-        grid_2.Add(wx.StaticText(self.panel, -1, ''), 0)
-        grid_2.Add(wx.StaticText(self.panel, -1, ''), 0)
-        grid_2.Add(self.button_choose, 0, wx.TOP, 4)
-        layout.Add(grid_2, 0, wx.LEFT | wx.RIGHT | wx.TOP, 10)
+        grid_3.Add(wx.StaticText(self.panel, -1, '     '), 0)
+        grid_3.Add(wx.StaticText(self.panel, -1, "File:"), 0, wx.RIGHT | wx.TOP, 4)
+        grid_3.Add(self.text_file, 1, wx.EXPAND | wx.TOP, 4)
+        grid_3.Add(wx.StaticText(self.panel, -1, ''), 0)
+        grid_3.Add(wx.StaticText(self.panel, -1, ''), 0)
+        grid_3.Add(self.button_choose, 0, wx.TOP, 4)
+        layout.Add(grid_3, 0, wx.LEFT | wx.RIGHT | wx.TOP, 10)
 
         box_1 = wx.BoxSizer(wx.HORIZONTAL)
         self.button_help = wx.Button(self.panel, -1, "Help", size=(70,30))
@@ -102,7 +112,10 @@ class Frame(wx.Frame):
         self.OpenFileDialog()
         self.UpdateState()
 
-    def OnChooseRadioDownload(self, event):
+    def OnChooseRadioDownloadPw(self, event):
+        self.UpdateState()
+
+    def OnChooseRadioDownloadUrl(self, event):
         self.UpdateState()
 
     def OnChooseRadioLocal(self, event):
@@ -119,7 +132,7 @@ class Frame(wx.Frame):
 
     def OnHelp(self, event):
         wx.BeginBusyCursor() 
-        import webbrowser 
+        import webbrowser
         webbrowser.open('file://' + scriptdir + '/help.html') 
         wx.EndBusyCursor() 
         
@@ -144,7 +157,7 @@ class Frame(wx.Frame):
                     dialog.ShowModal()
                     dialog.Destroy()
                 else:
-                    self.StartCompile(os.path.join(self.prefix, 'source', "casino-current.tar.gz"))
+                    self.StartCompile(os.path.join(self.prefix, 'source', config.file))
                 self.UpdateState()
         elif (self.process_compile):
             ret = self.process_compile.poll()
@@ -170,9 +183,9 @@ class Frame(wx.Frame):
                 self.UpdateState()
 
     def OnInstall(self, event):
-        if (self.radio_download.GetValue()):
+        if (self.radio_download_pw.GetValue()):
             target = os.path.join(self.prefix, 'source')
-            tarball = os.path.join(target, "casino-current.tar.gz")
+            tarball = os.path.join(target, config.file)
             username = self.text_username.GetValue()
             password = self.text_password.GetValue()
             if (os.path.exists(tarball)):
@@ -186,12 +199,23 @@ class Frame(wx.Frame):
                     self.radio_local.SetValue(True)
                     self.UpdateState()
                     return
-            if (password == ''):
-                dialog = wx.MessageDialog(None, 'Please input password', 'Error', wx.OK | wx.ICON_ERROR)
-                dialog.ShowModal()
-                dialog.Destroy()
-            else:
-                self.StartDownload(username, password, target)
+            self.StartDownloadPw(username, password, target)
+        elif (self.radio_download_url.GetValue()):
+            target = os.path.join(self.prefix, 'source')
+            tarball = os.path.join(target, config.file)
+            url = self.text_url.GetValue()
+            if (os.path.exists(tarball)):
+                dialog = wx.MessageDialog(None, tarball + ' already exists.  Remove it and continue download?', 'CASINO Setup', wx.OK | wx.CANCEL | wx.ICON_QUESTION)
+                if dialog.ShowModal() == wx.ID_OK:
+                    dialog.Destroy()
+                    os.remove(tarball)
+                else:
+                    dialog.Destroy()
+                    self.text_file.SetValue(tarball)
+                    self.radio_local.SetValue(True)
+                    self.UpdateState()
+                    return
+            self.StartDownloadUrl(url, target)
         else:
             file = self.text_file.GetValue()
             if (file):
@@ -203,7 +227,13 @@ class Frame(wx.Frame):
                 dialog.Destroy()
         self.UpdateState()
 
+    def OnTextUsername(self, event):
+        self.UpdateState()
+
     def OnTextPassword(self, event):
+        self.UpdateState()
+
+    def OnTextUrl(self, event):
         self.UpdateState()
 
     def OpenFileDialog(self):
@@ -234,8 +264,15 @@ class Frame(wx.Frame):
                                                 stdin=subprocess.PIPE)
         self.text_log.AppendText('Start compilation of CASINO\n')
 
-    def StartDownload(self, username, password, target):
-        cmd = ['python', os.path.join(self.scriptdir, 'download.py'), username, password, target]
+    def StartDownloadPw(self, username, password, target):
+        cmd = ['python', os.path.join(self.scriptdir, 'download_pw.py'), username, password, target]
+        self.process_download = subprocess.Popen(cmd, stdout=subprocess.PIPE,
+                                                    stderr=subprocess.STDOUT,
+                                                    stdin=subprocess.PIPE)
+        self.text_log.AppendText('Start download of CASINO\n')
+        
+    def StartDownloadUrl(self, url, target):
+        cmd = ['python', os.path.join(self.scriptdir, 'download_url.py'), url, target]
         self.process_download = subprocess.Popen(cmd, stdout=subprocess.PIPE,
                                                  stderr=subprocess.STDOUT,
                                                  stdin=subprocess.PIPE)
@@ -243,27 +280,44 @@ class Frame(wx.Frame):
         
     def UpdateState(self):
         if (self.process_download or self.process_compile):
-            self.radio_download.Disable()
+            self.radio_download_pw.Disable()
+            self.radio_download_url.Disable()
             self.radio_local.Disable()
+            self.text_username.Disable()
             self.text_password.Disable()
+            self.text_url.Disable()
             self.text_file.Disable()
             self.button_choose.Disable()
             self.button_help.Disable()
             self.button_install.Disable()
         else:
-            self.radio_download.Enable()
+            self.radio_download_pw.Enable()
+            self.radio_download_url.Enable()
             self.radio_local.Enable()
             self.button_choose.Enable()
             self.button_help.Enable()
-            if (self.radio_download.GetValue()):
+            if (self.radio_download_pw.GetValue()):
+                self.text_username.Enable()
                 self.text_password.Enable()
+                self.text_url.Disable()
                 self.text_file.Disable()
-                if (self.text_username.GetValue() and len(self.text_password.GetValue()) == 8):
+                if (self.text_username.GetValue() and self.text_password.GetValue()):
+                    self.button_install.Enable()
+                else:
+                    self.button_install.Disable()
+            elif (self.radio_download_url.GetValue()):
+                self.text_username.Disable()
+                self.text_password.Disable()
+                self.text_url.Enable()
+                self.text_file.Disable()
+                if (self.text_url.GetValue()):
                     self.button_install.Enable()
                 else:
                     self.button_install.Disable()
             else:
+                self.text_username.Disable()
                 self.text_password.Disable()
+                self.text_url.Disable()
                 self.text_file.Enable()
                 if (self.text_file.GetValue()):
                     self.button_install.Enable()
@@ -274,7 +328,7 @@ if __name__ == '__main__':
     if (len(sys.argv) < 2):
         print "Usage:", sys.argv[0], "prefix"
         sys.exit(127)
-    scriptdir = os.path.dirname(sys.argv[0])
+    scriptdir = os.path.abspath(os.path.dirname(sys.argv[0]))
     prefix = sys.argv[1]
     app = wx.App()
     frame = Frame(prefix, scriptdir)

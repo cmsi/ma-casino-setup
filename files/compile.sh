@@ -17,10 +17,10 @@ BINDIR="$PREFIX/bin"
 SHAREDIR="$PREFIX/share"
 CASINODIR="$SHAREDIR/CASINO"
 
-# if [ -d "$CASINODIR" ]; then
-#   echo "Error: CASINO directory exists ($CASINODIR)"
-#   exit 127
-# fi
+if [ -d "$CASINODIR" ]; then
+  echo "Error: CASINO directory exists ($CASINODIR)"
+  exit 127
+fi
 
 # Extract files from the tarball
 if [ -f "$SOURCE" ]; then :; else
@@ -29,18 +29,18 @@ if [ -f "$SOURCE" ]; then :; else
 fi
 mkdir -p "$SHAREDIR"
 echo "Extracting $SOURCE into $SHAREDIR"
-# tar zxvf "$SOURCE" -C "$SHAREDIR"
+tar zxvf "$SOURCE" -C "$SHAREDIR"
 
 # Compile
 echo "Compiling CASINO"
-# (cd "$CASINODIR" && make CASINO_ARCH=linuxpc-gcc-parallel HAVE_BLAS=yes LDBLAS_yes=-lblas HAVE_LAPACK=yes LDLAPACK_yes=-llapack)
+(cd "$CASINODIR" && make CASINO_ARCH=linuxpc-gcc-parallel HAVE_BLAS=yes LDBLAS_yes=-lblas HAVE_LAPACK=yes LDLAPACK_yes=-llapack)
 
 echo "Making runqmc script in $BINDIR"
 mkdir -p $BINDIR
 cat << EOF > $BINDIR/runqmc
 #!/bin/sh
 export CASINO_ARCH=linuxpc-gcc-parallel
-$CASINODIR/bin_qmc/rungmc "$@"
+$CASINODIR/bin_qmc/runqmc "\$@"
 EOF
 chmod +x $BINDIR/runqmc
 
