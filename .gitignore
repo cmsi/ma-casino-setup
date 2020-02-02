@@ -1,0 +1,4 @@
+*.pyc
+casino-setup_*
+casino-setup/debian/files
+casino-setup/debian/casino-setup*
