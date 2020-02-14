@@ -35,13 +35,16 @@ tar zxvf "$SOURCE" -C "$SHAREDIR"
 echo "Compiling CASINO"
 (cd "$CASINODIR" && make CASINO_ARCH=linuxpc-gcc-parallel HAVE_BLAS=yes LDBLAS_yes=-lblas HAVE_LAPACK=yes LDLAPACK_yes=-llapack)
 
-echo "Making runqmc script in $BINDIR"
+echo "Making scripts in $BINDIR"
 mkdir -p $BINDIR
-cat << EOF > $BINDIR/runqmc
+SCRIPTS="runqmc graphit"
+for s in $SCRIPTS; do
+  cat << EOF > $BINDIR/$s
 #!/bin/sh
 export CASINO_ARCH=linuxpc-gcc-parallel
-$CASINODIR/bin_qmc/runqmc "\$@"
+$CASINODIR/bin_qmc/$s "\$@"
 EOF
-chmod +x $BINDIR/runqmc
+  chmod +x $BINDIR/$s
+done
 
 echo "Compilation Done"
