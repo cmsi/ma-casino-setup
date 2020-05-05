@@ -1,4 +1,4 @@
-#! /usr/bin/python
+#!/usr/bin/python2
 
 # CASINO Setup GUI written by Synge Todo
 
@@ -265,14 +265,14 @@ class Frame(wx.Frame):
         self.text_log.AppendText('Start compilation of CASINO\n')
 
     def StartDownloadPw(self, username, password, target):
-        cmd = ['python', os.path.join(self.scriptdir, 'download_pw.py'), username, password, target]
+        cmd = ['python2', os.path.join(self.scriptdir, 'download_pw.py'), username, password, target]
         self.process_download = subprocess.Popen(cmd, stdout=subprocess.PIPE,
                                                     stderr=subprocess.STDOUT,
                                                     stdin=subprocess.PIPE)
         self.text_log.AppendText('Start download of CASINO\n')
         
     def StartDownloadUrl(self, url, target):
-        cmd = ['python', os.path.join(self.scriptdir, 'download_url.py'), url, target]
+        cmd = ['python2', os.path.join(self.scriptdir, 'download_url.py'), url, target]
         self.process_download = subprocess.Popen(cmd, stdout=subprocess.PIPE,
                                                  stderr=subprocess.STDOUT,
                                                  stdin=subprocess.PIPE)

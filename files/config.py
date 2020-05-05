@@ -1,4 +1,4 @@
-#! /usr/bin/python
+#!/usr/bin/python2
 
 base_url = "https://casinoqmc.net"
 dir = "download"
