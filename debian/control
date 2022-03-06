@@ -7,7 +7,7 @@ Standards-Version: 3.9.3
 
 Package: casino-setup
 Architecture: all
-Depends: ${misc:Depends}, ${python:Depends}, build-essential, gfortran, bc, wget, python-wxgtk3.0 | python-wxgtk2.8
+Depends: ${misc:Depends}, ${python:Depends}, build-essential, gfortran, bc, wget, python3-wxgtk4.0 | python-wxgtk3.0
 Description: GUI utility for installing CASINO
  casino-setup is a GUI utility for downloading the source code of
  CASINO from the official website and installing it under $HOME/bin
